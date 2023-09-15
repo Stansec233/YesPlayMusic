@@ -2,7 +2,10 @@
   <div class="track-list">
     <ContextMenu ref="menu">
       <div v-show="type !== 'cloudDisk'" class="item-info">
-        <img :src="rightClickedTrackComputed.al.picUrl | resizeImage(224)" />
+        <img
+          :src="rightClickedTrackComputed.al.picUrl | resizeImage(224)"
+          loading="lazy"
+        />
         <div class="info">
           <div class="title">{{ rightClickedTrackComputed.name }}</div>
           <div class="subtitle">{{ rightClickedTrackComputed.ar[0].name }}</div>
@@ -62,6 +65,7 @@
         v-for="(track, index) in tracks"
         :key="itemKey === 'id' ? track.id : `${track.id}${index}`"
         :track-prop="track"
+        :track-no="index + 1"
         :highlight-playing-track="highlightPlayingTrack"
         @dblclick.native="playThisList(track.id || track.songId)"
         @click.right.native="openMenu($event, track, index)"
@@ -269,10 +273,15 @@ export default {
       }
     },
     copyLink() {
-      navigator.clipboard.writeText(
+      this.$copyText(
         `https://music.163.com/song?id=${this.rightClickedTrack.id}`
-      );
-      this.showToast(locale.t('toast.copied'));
+      )
+        .then(() => {
+          this.showToast(locale.t('toast.copied'));
+        })
+        .catch(err => {
+          this.showToast(`${locale.t('toast.copyFailed')}${err}`);
+        });
     },
     removeTrackFromQueue() {
       this.$store.state.player.removeTrackFromQueue(

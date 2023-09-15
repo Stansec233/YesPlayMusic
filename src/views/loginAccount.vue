@@ -69,7 +69,7 @@
 
         <div v-show="mode == 'qrCode'">
           <div v-show="qrCodeSvg" class="qr-code-container">
-            <img :src="qrCodeSvg" />
+            <img :src="qrCodeSvg" loading="lazy" />
           </div>
           <div class="qr-code-info">
             {{ qrCodeInformation }}
@@ -261,6 +261,8 @@ export default {
       });
     },
     checkQrCodeLogin() {
+      // 清除二维码检测
+      clearInterval(this.qrCodeCheckInterval);
       this.qrCodeCheckInterval = setInterval(() => {
         if (this.qrCodeKey === '') return;
         loginQrCodeCheck(this.qrCodeKey).then(result => {
@@ -275,7 +277,7 @@ export default {
             clearInterval(this.qrCodeCheckInterval);
             this.qrCodeInformation = '登录成功，请稍等...';
             result.code = 200;
-            result.cookie = result.cookie.replace('HTTPOnly', '');
+            result.cookie = result.cookie.replaceAll(' HTTPOnly', '');
             this.handleLoginResponse(result);
           }
         });
